@@ -81,7 +81,28 @@ function workerScriptHandlers(target, settings, secretMessage){
         });
     };
 
-    target.hostLocation = settings.location;
+    target.hostLocation = {};
+
+    function addLocationProperty(key, value){
+        target.hostLocation['_' + key] = value;
+        Object.defineProperty(target.hostLocation, key, {
+            get: function(){
+                return this['_' + key];
+            },
+            set: function(value){
+                if(this['_' + key] !== value && typeof this['_' + key] === 'string'){
+                    this['_' + key] = value;
+                    secretMessage('location', JSON.stringify([key, value]));
+                }else{
+                    this['_' + key] = value;
+                }
+            }
+        });
+    }
+
+    for(var key in settings.location){
+        addLocationProperty(key, settings.location[key]);
+    };
 
     target.importScripts = function(path){
         return originalImport(settings.host + path);
@@ -138,14 +159,27 @@ function workerScriptHandlers(target, settings, secretMessage){
         target.emit(name, value);
     };
 
+    handlers.location = function(data){
+        var location = JSON.parse(data);
+
+        for(var key in location){
+            target.hostLocation[key] = location[key];
+        }
+    };
+
     return handlers;
 }
 
-function workUp(makeWorker){
-    if(!makeWorker){
+function workUp(makeWorker, name){
+    if(typeof makeWorker !== 'function'){
+        name = makeWorker;
         makeWorker = function(path){
             return new Worker(path);
         };
+    }
+
+    if(typeof name !== 'string'){
+        name = 'worker';
     }
 
     var secret = Math.random();
@@ -171,6 +205,8 @@ function workUp(makeWorker){
     }
 
     var worker = makeWorker(URL.createObjectURL(blob));
+
+    worker.name = name;
 
     worker.loadFile = function(path){
         worker.postMessage(secret + ':load:' + path);
@@ -214,6 +250,16 @@ function workUp(makeWorker){
             }
 
             secretMessage('local', JSON.stringify([id, result]));
+        };
+
+        handlers.location = function(data){
+            var args = JSON.parse(data),
+                key = args[0],
+                value = args[1];
+
+            global.location[key] = value;
+
+            secretMessage('location', JSON.stringify(global.location));
         };
 
         return handlers;
