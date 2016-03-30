@@ -62,7 +62,10 @@ exposes a localStorage API that is like the normal one but with error-first call
 It probably wont ever error? ¯\\_(ツ)_/¯
 
 `set(key, value, callback)` sets `key` to `value` and calls back
+
 `get(key, callback)` gets `key` and calls back with the `value`
+
 `remove(key, callback)` removes `key` to `value` and calls back
+
 `getAll(callback)` gets all `key`s and calls back with them
 
