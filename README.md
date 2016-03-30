@@ -4,7 +4,7 @@ up-skill your workers.
 
 ## What
 
-Adds functionality to workers to make developing apps in the a little easier.
+Adds functionality to workers to make developing apps in them a little easier.
 
 ## Usage
 
