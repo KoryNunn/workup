@@ -87,10 +87,16 @@ function workerScriptHandlers(target, settings, secretMessage){
         target.hostLocation['_' + key] = value;
         Object.defineProperty(target.hostLocation, key, {
             get: function(){
+                if(key === 'href'){
+                    return this.protocol + '//' + this.hostname + ':' + this.port + this.pathname + this.search + this.hash;
+                }
                 return this['_' + key];
             },
             set: function(value){
-                if(this['_' + key] !== value && typeof this['_' + key] === 'string'){
+                if(key === 'hash'){
+                    value = '#' + value.replace(/^#/, '');
+                }
+                if(this[key] !== value && typeof this[key] === 'string'){
                     this['_' + key] = value;
                     secretMessage('location', JSON.stringify([key, value]));
                 }else{
@@ -163,7 +169,7 @@ function workerScriptHandlers(target, settings, secretMessage){
         var location = JSON.parse(data);
 
         for(var key in location){
-            target.hostLocation[key] = location[key];
+            target.hostLocation['_' + key] = location[key];
         }
     };
 
