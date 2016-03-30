@@ -15,6 +15,8 @@ var worker = workUp(createWorker, name); // both createWorker and name are optio
 
 ```
 
+If no `createWorker` is passed, workup will use `new Worker`
+
 Note: `name` doesn't work at the moment and in chrome you get `#1` in your sources list.
 This may get resolved in time.
 
@@ -24,9 +26,13 @@ This may get resolved in time.
 
 Tell the worker to load a file.
 
+`worker.loadFile('file.js')`
+
 #### loadScript
 
 Tell the worker to load a `Blob`
+
+`worker.loadScript(someBlob)`
 
 ### Worker thread:
 
